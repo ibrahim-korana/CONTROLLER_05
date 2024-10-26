@@ -1,0 +1,24 @@
+## IDF Component Manager Manifest File
+dependencies:
+  ## Required IDF version
+  idf:
+    version: ">=4.1.0"
+  home_i2c:
+    path: D:/esp_prj/global/home_i2c
+  home_8574:
+    path: D:/esp_prj/global/home_8574
+  home_8563:
+    path: D:/esp_prj/global/home_8563  
+  iot_button:
+    path: D:/esp_prj/global/iot_button 
+  dali_globale:
+    path: D:/esp_prj/dali_global/dali_globale 
+  ssd1306:
+    path: D:/esp_prj/global/ssd1306  
+  ESP32Time:
+    path: D:/esp_prj/global/ESP32Time 
+  iptool:
+    path: D:/esp_prj/global/iptool
+  
+       
+  bblanchon/arduinojson: "^6.21.3"  
