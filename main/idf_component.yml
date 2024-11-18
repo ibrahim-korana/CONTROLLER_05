@@ -1,5 +1,6 @@
 ## IDF Component Manager Manifest File
 dependencies:
+  espressif/mdns: "*"
   ## Required IDF version
   idf:
     version: ">=4.1.0"
@@ -11,8 +12,8 @@ dependencies:
     path: D:/esp_prj/global/home_8563  
   iot_button:
     path: D:/esp_prj/global/iot_button 
-  dali_globale:
-    path: D:/esp_prj/dali_global/dali_globale 
+  dali_global:
+    path: D:/esp_prj/dali_global/dali_global 
   ssd1306:
     path: D:/esp_prj/global/ssd1306  
   ESP32Time:

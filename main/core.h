@@ -111,6 +111,7 @@ typedef struct {
 typedef struct {
     uint8_t short_addr;
     uint8_t type;
+    uint8_t ext_type;
 } gear_t;
 
 

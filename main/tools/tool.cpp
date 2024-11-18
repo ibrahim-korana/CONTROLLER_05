@@ -15,7 +15,7 @@ void default_config(void)
      GlobalConfig.tcpserver_start=1;
      GlobalConfig.daliserver_start=1;
      GlobalConfig.comminication=0;
-     GlobalConfig.time_sync=0;
+     GlobalConfig.time_sync=1;
 
      GlobalConfig.tus1=13;
      GlobalConfig.tus2=13;
@@ -46,8 +46,8 @@ void network_default_config(void)
      strcpy((char*)NetworkConfig.ip,"192.168.1.220");
      strcpy((char*)NetworkConfig.netmask,"255.255.255.0");
      strcpy((char*)NetworkConfig.gateway,"192.168.1.1");
-     strcpy((char*)NetworkConfig.dns,"192.168.1.1");
-     strcpy((char*)NetworkConfig.backup_dns,"8.8.8.8");
+     strcpy((char*)NetworkConfig.dns,"8.8.8.8");
+     strcpy((char*)NetworkConfig.backup_dns,"4.4.4.4");
      NetworkConfig.channel = 1;
      NetworkConfig.WIFI_MAXIMUM_RETRY=20;
 /*
@@ -70,7 +70,6 @@ void led_test(void)
     {
         gpio_set_level(LED1,kk);
         gpio_set_level(LED2,kk);
-        gpio_set_level(LED3,kk);
         kk=!kk;
         vTaskDelay(100 / portTICK_PERIOD_MS); 
     }

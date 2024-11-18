@@ -20,10 +20,11 @@
 #include "comp/ww5500.h"
 #include "comp/enc28j60/ethernet.h"
 #include "comp/dali.h"
-#include "dali_globale.h"
+#include "dali_global.h"
 #include "ssd1306.h"
 #include "esp32Time.h"
 #include "IPTool.h"
+#include "esp_timer.h"
 #include "comp/tcpserver.h"
 #include "comp/tcpclient.h"
 #include "comp/udpserver.h"
@@ -38,9 +39,9 @@
         abort();                                         \
     }
 
-#define LED1 GPIO_NUM_0
-#define LED2 GPIO_NUM_2
-#define LED3 GPIO_NUM_15
+
+#define LED1 GPIO_NUM_2
+#define LED2 GPIO_NUM_15
 
 #define BUTTON1 GPIO_NUM_39
 #define BUTTON2 GPIO_NUM_36
@@ -57,6 +58,10 @@
 #define DALI1_RX GPIO_NUM_32
 #define DALI1_ADC GPIO_NUM_34
 
+#define DALI2_TX GPIO_NUM_17
+#define DALI2_RX GPIO_NUM_16
+#define DALI2_ADC GPIO_NUM_35
+
 #define ETHERNET
 #define ETH_W5500
 #define SSD1306
@@ -70,6 +75,8 @@ ESP_EVENT_DEFINE_BASE(SYSTEM_EVENTS);
 
 #define BEKLE vTaskDelay(20 / portTICK_PERIOD_MS);
 #define MAX_GATEWAY 40
+
+#define MBEKLE vTaskDelay(5 / portTICK_PERIOD_MS);
 
 
 cron_job *jobs[20] = {};
@@ -97,11 +104,7 @@ char *BroadcastAdr=NULL;
 config_t GlobalConfig;
 home_network_config_t NetworkConfig = {};
 TcpServer tcpserver = TcpServer();
-TcpServer daliserver = TcpServer();
-
 UdpServer udpserver = UdpServer();
-
-TcpClient daliclient = TcpClient();
 
 
 bool Net_Connect = false;
@@ -119,7 +122,7 @@ void command_action(uint8_t adr, uint8_t gurup, uint8_t comm);
 #define ZAMAN_FILE "/config/zaman.bin"
 #define CLIENT_FILE "/config/client.bin"
 
-void dali_callback(package_t *data);
+void dali_callback(package_t *data, backword_t *backword);
 void all_on(void);
 void all_off(void);
 
@@ -135,6 +138,7 @@ void display_write(int satir, const char *txt)
 #include "tools/config.cpp"
 #include "tools/dali_tool.cpp"
 #include "tools/tcp_events.cpp"
+
 #include "comp/http.c"
 
 void webwrite(home_network_config_t net, config_t glob)
@@ -151,8 +155,71 @@ void defreset(void *)
 
 void udp_callback(uint8_t *data, uint8_t datalen, uint8_t *recv, uint8_t *reclen)
 {
-    printf("%d %s\n",datalen,data);
+    ESP_LOGI(TAG,"UDP GELEN << %d %s",datalen,data);
+    cJSON *rcv_json = cJSON_Parse((char*)data);
+    char *command = (char *)calloc(1,30);
+    JSON_getstring(rcv_json,"com", command,28);
+
+    if (strcmp(command,"reqserver")==0)
+      {
+        
+            char *ss0 = (char*)calloc(1,100);
+            ss0 = Addr.to_string(NetworkConfig.home_ip);
+            cJSON *root = cJSON_CreateObject();
+            cJSON_AddStringToObject(root, "com", "server");
+            cJSON_AddStringToObject(root, "ip", ss0);
+            char *dat = cJSON_PrintUnformatted(root);
+            strcpy((char*)recv,dat);
+            *reclen = strlen(dat);
+            cJSON_free(dat);
+            cJSON_Delete(root);
+            free(ss0);
+            
+           printf("%s\n",recv);
+      }
+    free(command);
+    cJSON_Delete(rcv_json); 
 }
+
+static void heard_task(void *args)
+{  
+    static uint8_t ss=0;  
+    for (;;) {
+        gpio_set_level(LED1,1);
+        vTaskDelay(50/portTICK_PERIOD_MS);
+        gpio_set_level(LED1,0); 
+        if (++ss>6) {
+            char *tt = (char*)calloc(1,64);
+            Get_current_time(tt);
+            display_write(3,tt);
+            free(tt);
+            ss=0;
+            ssd1306_clear_line(&ekran,2,false);
+        }
+        vTaskDelay(5000/portTICK_PERIOD_MS);
+        }
+}
+
+void query_dns(const char *name)
+{
+    struct addrinfo *address_info;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int res = getaddrinfo(name, NULL, &hints, &address_info);
+    if (res != 0 || address_info == NULL) {
+        ESP_LOGE(TAG, "couldn't get hostname for :%s: "
+                      "getaddrinfo() returns %d, addrinfo=%p", name, res, address_info);
+    } else {
+        if (address_info->ai_family == AF_INET) {
+            struct sockaddr_in *p = (struct sockaddr_in *)address_info->ai_addr;
+            ESP_LOGI(TAG, "Resolved %s IPv4 address: %s", name,ipaddr_ntoa((const ip_addr_t*)&p->sin_addr.s_addr));
+        }
+    }    
+}
+
 
 extern "C" void app_main()
 {
@@ -160,7 +227,7 @@ extern "C" void app_main()
     esp_log_level_set("wifi_init", ESP_LOG_NONE);
     esp_log_level_set("phy_init", ESP_LOG_NONE);
     esp_log_level_set("gpio", ESP_LOG_NONE);
-  //  esp_log_level_set("SOCKET_SERVER", ESP_LOG_NONE);
+    esp_log_level_set("SOCKET_SERVER", ESP_LOG_NONE);
     
     ESP_LOGI(TAG, "INITIALIZING...");
     
@@ -172,6 +239,7 @@ extern "C" void app_main()
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_handler, NULL, NULL));
 
     config();
+
     Net_Connect = false; 
 
             ESP_LOGI(TAG,"Wan Type %s",(NetworkConfig.wan_type==1)?"Ethernet":"Wifi");
@@ -181,6 +249,7 @@ extern "C" void app_main()
 			{
 				//Wan haberleşmesi ethernettir. Wifi kapalı
 				if (w5500.start(NetworkConfig, &GlobalConfig)!=ESP_OK) FATAL_MSG(0,"Ethernet Baslatilamadi..");
+                
 				Net_Connect=true;
 			}
             #endif
@@ -202,7 +271,6 @@ extern "C" void app_main()
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(TCP_SERVER_EVENTS, ESP_EVENT_ANY_ID, tcp_handler, NULL, NULL)); 
 
-
     if (Net_Connect)
       {
         if (GlobalConfig.http_start==1)
@@ -219,18 +287,13 @@ extern "C" void app_main()
             strcpy(BroadcastAdr, Addr.to_string(NetworkConfig.home_broadcast));
             udpserver.start(5000,udp_callback);
 		}
-
-        if (GlobalConfig.daliserver_start==1)
-		{
-			ESP_LOGI(TAG, "TCP DALI 5718 SOCKET SERVER START");
-            //daliserver.start(5718);
-		}
-
-        if (GlobalConfig.time_sync==1) Set_SystemTime_SNTP_diff();
+        query_dns("smartq.com.tr");
+        if (GlobalConfig.time_sync==1) {
+            Set_SystemTime_SNTP_diff();
+        }
       }
-
-    
-#ifdef CLOCK
+  
+#ifdef SSD1306
     ssd1306_clear_screen(&ekran,false);
 #endif    
     char *ss = (char*)calloc(1,100);
@@ -264,10 +327,18 @@ extern "C" void app_main()
 
 ESP_LOGI(TAG, "Init CRON..");
 init_cron();
+xTaskCreatePinnedToCore(heard_task, "task_00", 2048, NULL, 10, NULL,1);
+
+//Saati Yaz
+char *tt = (char*)calloc(1,64);
+Get_current_time(tt);
+display_write(3,tt);
+free(tt);
+
 
 ESP_LOGI(TAG, "Init Stop..");
 
-    //dali_out_test();
+//   dali_out_test();
 
     
 /*

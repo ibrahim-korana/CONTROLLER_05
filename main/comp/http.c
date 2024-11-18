@@ -321,6 +321,7 @@ void timerCallBack( TimerHandle_t xTimer )
 }
 
 
+//----------------------------------------
 int replacechar(char *str, char orig, char rep) {
     char *ix = str;
     int n = 0;
@@ -330,6 +331,71 @@ int replacechar(char *str, char orig, char rep) {
     }
     return n;
 }
+
+char * extract_between(const char *str, const char *p1, const char *p2)
+{
+  const char *i1 = strstr(str, p1);
+  if(i1 != NULL)
+  {
+    const size_t pl1 = strlen(p1);
+    const char *i2 = strstr(i1 + pl1, p2);
+    if(p2 != NULL)
+    {
+     /* Found both markers, extract text. */
+     const size_t mlen = i2 - (i1 + pl1);
+     char *ret = (char *)malloc(mlen + 1);
+     if(ret != NULL)
+     {
+       memcpy(ret, i1 + pl1, mlen);
+       ret[mlen] = '\0';
+       return ret;
+     }
+    }
+  }
+  return NULL;
+}
+
+char *urlDecode(const char *str) {
+  //int d = 0; /* whether or not the string is decoded */
+
+  char *dStr = (char *) malloc(strlen(str) + 1);
+  char eStr[] = "00"; /* for a hex code */
+
+  strcpy(dStr, str);
+
+  //while(!d) {
+    //d = 1;
+    int i; /* the counter for the string */
+
+    for(i=0;i<strlen(dStr);++i) {
+
+      if(dStr[i] == '%') {
+        if(dStr[i+1] == 0)
+          return dStr;
+
+        if(isxdigit(dStr[i+1]) && isxdigit(dStr[i+2])) {
+
+          //d = 0;
+
+          /* combine the next to numbers into one */
+          eStr[0] = dStr[i+1];
+          eStr[1] = dStr[i+2];
+
+          /* convert it to decimal */
+          long int x = strtol(eStr, NULL, 16);
+
+          /* remove the hex */
+          memmove(&dStr[i+1], &dStr[i+3], strlen(&dStr[i+3])+1);
+
+          dStr[i] = x;
+        }
+      }
+      else if(dStr[i] == '+') { dStr[i] = ' '; }
+    }
+  //}
+  return dStr;
+}
+//----------------------------------------
 
 static esp_err_t save_handler(httpd_req_t *req)
 {
@@ -353,6 +419,7 @@ static esp_err_t save_handler(httpd_req_t *req)
     printf("BUF %s\n",buf);
 
     char *aaa = (char *) calloc(1,50);
+    char *bbb = (char *) calloc(1,50);
     int p = 0;
 
     findparam(buf,"MQTT",aaa);
@@ -429,11 +496,15 @@ static esp_err_t save_handler(httpd_req_t *req)
 
     findparam(buf,"SSID",aaa);
     replacechar(aaa,'+',' ');
-    strcpy((char *)netconfig.wifi_ssid,aaa);
+    strcpy(bbb,urlDecode(aaa));
+    printf("SSID %s\n",bbb);
+    strcpy((char *)netconfig.wifi_ssid,bbb);
 
     findparam(buf,"PASS",aaa);
     replacechar(aaa,'+',' ');
-    strcpy((char *)netconfig.wifi_pass,aaa);
+    strcpy(bbb,urlDecode(aaa));
+    printf("PASS %s\n",bbb);
+    strcpy((char *)netconfig.wifi_pass,bbb);
 
     findparam(buf,"DNS1",aaa);
     strcpy((char *)netconfig.dns,aaa);

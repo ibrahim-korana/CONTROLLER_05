@@ -1,7 +1,7 @@
 
 
 void time_sync(struct timeval *tv)
-{
+{   
     ESP_LOGI(TAG,"Time Sync");
     time_t now;
 	struct tm tt1;
@@ -17,7 +17,6 @@ void time_sync(struct timeval *tv)
     saat.Get_current_date_time(rr,&tt0);
     ESP_LOGW(TAG, "Tarih/Saat %s", rr);
     free(rr);
-
 }
 
 
@@ -63,17 +62,16 @@ void ip_handler(void* handler_args, esp_event_base_t base, int32_t id, void* eve
                 NetworkConfig.home_broadcast = (uint32_t)(NetworkConfig.home_ip) | (uint32_t)0xFF000000UL;
                 //tcpclient.wait = false;
                 #ifdef ETHERNET
-                    if (id==IP_EVENT_ETH_GOT_IP) w5500.set_connect_bit();
+                    if (id==IP_EVENT_ETH_GOT_IP) {
+                        w5500.set_connect_bit();
+                    }
                 #endif
                 if (id==IP_EVENT_STA_GOT_IP) wifi.set_connection_bit();
                 ESP_LOGI(TAG, "IP Received");
                 char *ss = (char*)calloc(1,100);
                 sprintf(ss,"%s",Addr.to_string(NetworkConfig.home_ip));
                 display_write(0,ss);
-                free(ss);
-
-               // sntp_set_time_sync_notification_cb(time_sync);
-               // Set_SystemTime_SNTP();             
+                free(ss);            
               }
 }
 
@@ -84,6 +82,7 @@ void eth_handler(void* handler_args, esp_event_base_t base, int32_t id, void* ev
         	{
         		esp_eth_handle_t eth_handle = *(esp_eth_handle_t *)event_data;
         		esp_eth_ioctl(eth_handle, ETH_CMD_G_MAC_ADDR, NetworkConfig.mac);
+                
         		ESP_LOGI(TAG, "Ethernet Link Up");
         	}
     if(id==ETHERNET_EVENT_DISCONNECTED)

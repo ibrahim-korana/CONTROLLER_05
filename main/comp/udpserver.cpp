@@ -10,12 +10,12 @@ void UdpServer::server_task(void *pvParameters)
 {
     UdpServer *ths =( UdpServer *)pvParameters;
     uint8_t *rx_buffer;
-    uint8_t *back;
     char addr_str[128];
     int addr_family = AF_INET;
     int ip_protocol = 0;
     int port = ths->port;
     struct sockaddr_in dest_addr;
+    uint8_t back[128];
 
     while (1) 
     {
@@ -66,7 +66,6 @@ void UdpServer::server_task(void *pvParameters)
             } else {
                 inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
                 rx_buffer[len] = 0;
-                back = (uint8_t *)calloc(1,MAX_DATA_LEN);
                 uint8_t bcklen=0;
                 ths->callback(rx_buffer, len, back, &bcklen);
                 if (bcklen>0)
@@ -77,7 +76,6 @@ void UdpServer::server_task(void *pvParameters)
                             break;
                         }
                   }
-                  free(back);
             }
         } //while
         free(rx_buffer);
@@ -198,7 +196,7 @@ bool UdpServer::send_and_receive(const char* hostip, uint8_t *data, int datalen,
                 //inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
                 recv[len] = 0; // Null-terminate whatever we received and treat like a string
                 *reclen=len;
-                //ESP_LOGI(UDP_TAG, "recvlen %s %d %s", addr_str, len, (char*)recv);
+                //ESP_LOGI(UDP_TAG, "recvlen %d %s",  len, (char*)recv);
                 vTaskDelay(10/portTICK_PERIOD_MS);
             }   
     }
@@ -230,7 +228,9 @@ uint8_t UdpServer::send_and_receive_dali(const char* hostip, package_t *pk, bool
             ok=false;
             if (strcmp((char*)ret,"OK")==0) return 0x71;            
             ret0=atoi((char*)ret);
+            
             //printf("Donen %d %s %d\n",rcvlen,(char*)ret,ret0);
+            
             return ret0;
         }  
         if (++rr>Max) {

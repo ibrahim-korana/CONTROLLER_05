@@ -19,7 +19,7 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-#include "dali_globale.h"
+#include "dali_global.h"
 
 typedef void (*udpserver_callback_t)(uint8_t *data, uint8_t datalen, uint8_t *recv, uint8_t *reclen);
 

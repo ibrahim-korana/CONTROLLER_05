@@ -123,7 +123,7 @@ esp_err_t WW5500::start(home_network_config_t cnf, config_t *gcnf)
     tmp = esp_netif_attach(eth_netif_spi, esp_eth_new_netif_glue(eth_handle_spi));
     if(tmp!=ESP_OK) return tmp;
 
-
+    
     tmp = esp_eth_start(eth_handle_spi);
     if(tmp!=ESP_OK) return tmp;
 
@@ -154,11 +154,18 @@ esp_err_t WW5500::set_ip(esp_netif_t * netif)
                 info_t.ip.addr = esp_ip4addr_aton((const char *)mConfig.ip);
                 info_t.netmask.addr = esp_ip4addr_aton((const char *)mConfig.netmask);
                 info_t.gw.addr = esp_ip4addr_aton((const char *)mConfig.gateway);
-                ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr((const char *)mConfig.dns), ESP_NETIF_DNS_MAIN));
-                ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr((const char *)mConfig.backup_dns), ESP_NETIF_DNS_BACKUP));
-                ESP_LOGI("W5500","Static IP");
+                
+                ESP_LOGI("W5500","Static IP %s",mConfig.ip);
+                
             } else ESP_LOGI("W5500","Dynamic IP");
             esp_netif_set_ip_info(netif, &info_t);
+            ESP_ERROR_CHECK(esp_netif_set_hostname(netif, "SMQ_DaliControl"));
+            ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr((const char *)mConfig.dns), ESP_NETIF_DNS_MAIN));
+            ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr((const char *)mConfig.backup_dns), ESP_NETIF_DNS_BACKUP));
+            ESP_LOGI("W5500","Hostname %s","SMQ_DaliControl");
+            ESP_LOGI("W5500","Dns %s",mConfig.dns);
+            ESP_LOGI("W5500","Backup Dns %s",mConfig.backup_dns);
+
     }
     return tmp;
 }

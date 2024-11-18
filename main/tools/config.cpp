@@ -11,14 +11,14 @@ void config(void)
 {
     gpio_config_t io_conf = {};
     io_conf.mode = GPIO_MODE_OUTPUT;
-    io_conf.pin_bit_mask = (1ULL<<LED1) | (1ULL << LED2) | (1ULL << LED3);
+    io_conf.pin_bit_mask = (1ULL<<LED1) | (1ULL << LED2);
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE; 
     gpio_config(&io_conf);
     ESP_LOGI(TAG,"LEDS Init");
     gpio_set_level(LED1,0);
     gpio_set_level(LED2,0);
-    gpio_set_level(LED3,0);
+ 
 
     led_test();
 
@@ -136,7 +136,7 @@ void config(void)
     rs485.initialize(&rs485_cfg, (gpio_num_t)LED1);
 
     ESP_LOGI(TAG,"Dali-1 Initialize");
-    dali.initialize(DALI1_TX, DALI1_RX, dali_callback, LED2, NULL);
+    dali.initialize(DALI1_TX, DALI1_RX, ADC_CHANNEL_7, dali_callback, LED2);
 }
 
 void cron_callback(cron_job *job)

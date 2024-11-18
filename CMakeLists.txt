@@ -2,7 +2,11 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 
-set(PROJECT_VER "1.0.5.1")
+
+add_compile_options("-Wno-deprecated-declarations")
+add_compile_options("-Wno-missing-field-initializers")
+
+set(PROJECT_VER "1.0.5.2")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(CONTROLLER_05)
 spiffs_create_partition_image(storage data FLASH_IN_PROJECT)

@@ -35,7 +35,11 @@ class WW5500 {
                                 ld.state = 1;
                                 ESP_ERROR_CHECK(esp_event_post(LED_EVENTS, LED_EVENTS_ETH, &ld, sizeof(led_events_data_t), portMAX_DELAY));
                               }
-        void reset(void);                      
+        void reset(void);  
+
+        esp_netif_t *get_netif(void) {
+            return eth_netif;
+        }                    
 
     private:
        EventGroupHandle_t Event;

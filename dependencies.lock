@@ -11,12 +11,18 @@ dependencies:
       service_url: https://api.components.espressif.com/
       type: service
     version: 6.21.5
-  dali_globale:
+  dali_global:
     component_hash: null
     source:
-      path: D:\esp_prj\dali_global\dali_globale
+      path: D:\esp_prj\dali_global\dali_global
       type: local
     version: 1.0.0
+  espressif/mdns:
+    component_hash: af6306fe65d637a3683d1cf671508fcedd6b05f9ca029a8815abeab64001fb8d
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.4.0
   home_8563:
     component_hash: null
     source:
@@ -58,6 +64,6 @@ dependencies:
       path: D:\esp_prj\global\ssd1306
       type: local
     version: 1.0.0
-manifest_hash: 5dfc4400bfd597d009ca3f714662e147d2a5414a7c5cc18f009b393a80d50abb
+manifest_hash: 6a0b15c7c4aa1f5b299e255f81327ecdbd8850273f4a9f4527858e64515cb2da
 target: esp32
 version: 1.0.0
