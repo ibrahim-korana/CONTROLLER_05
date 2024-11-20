@@ -962,6 +962,43 @@ void all_off(void)
 /*
     Kayıtlı lambaların statuslarını döndürür
 */
+void single_refresh(uint8_t addr, uint8_t type)
+{
+    backword_t lvl = {};
+            
+    lvl = get_level(addr, type);
+    if (lvl.backword==BACK_TIMEOUT) lvl = get_level(addr, type);
+    if (lvl.backword!=BACK_TIMEOUT)
+        ESP_LOGI(TAG,"     Addr %2d Power %03d",addr, lvl.data); else
+        ESP_LOGE(TAG,"     Addr %2d Timeout",addr);
+
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "com", "status");
+    cJSON_AddNumberToObject(root,"adres",addr);
+    cJSON_AddNumberToObject(root,"gurup",0);
+    cJSON_AddNumberToObject(root,"power",lvl.data);
+    if (lvl.backword==BACK_TIMEOUT) cJSON_AddNumberToObject(root,"error",0x71);
+    cJSON_AddBoolToObject(root,"stat",(lvl.data>0)?true:false);
+    char *dat = cJSON_PrintUnformatted(root);
+    tcpserver.Send(dat);
+    cJSON_free(dat);
+    cJSON_Delete(root);
+    BEKLE 
+}
+
+void perde_reset(uint8_t addr, uint8_t type)
+{
+    package_t pk = {};
+    address_t bb = {};  
+    bb.short_adr = true;
+    bb.arc_power = false;
+    bb.data = addr;
+    pk.data.type = BLOCK_16;
+    pk.data.data0 = package_address(bb); 
+    pk.data.data1 = 0xE0;
+    dali_double_send(&pk,type); 
+}
+
 void refresh(void)
 {
     ESP_LOGI(TAG,"Refresh");
@@ -970,26 +1007,10 @@ void refresh(void)
         gear_t ff={};
         disk.read_file(GEAR_FILE,&ff,sizeof(gear_t),i);
         if (ff.short_addr<64) {
-            backword_t lvl = {};
+            //backword_t lvl = {};
             
-            lvl = get_level(ff.short_addr, ff.type);
-            if (lvl.backword==BACK_TIMEOUT) lvl = get_level(ff.short_addr, ff.type);
-            if (lvl.backword!=BACK_TIMEOUT)
-                ESP_LOGI(TAG,"     Addr %2d Power %03d",ff.short_addr, lvl.data); else
-                ESP_LOGE(TAG,"     Addr %2d Timeout",ff.short_addr);
-  
-            cJSON *root = cJSON_CreateObject();
-            cJSON_AddStringToObject(root, "com", "status");
-            cJSON_AddNumberToObject(root,"adres",ff.short_addr);
-            cJSON_AddNumberToObject(root,"gurup",0);
-            cJSON_AddNumberToObject(root,"power",lvl.data);
-            if (lvl.backword==BACK_TIMEOUT) cJSON_AddNumberToObject(root,"error",0x71);
-            cJSON_AddBoolToObject(root,"stat",(lvl.data>0)?true:false);
-            char *dat = cJSON_PrintUnformatted(root);
-            tcpserver.Send(dat);
-            cJSON_free(dat);
-            cJSON_Delete(root);
-            BEKLE
+            single_refresh(ff.short_addr, ff.type);
+            
         }
     }
     ESP_LOGI(TAG,"Refresh SONLANDIRILDI");

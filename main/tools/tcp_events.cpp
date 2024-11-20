@@ -132,6 +132,8 @@ void data_parse(char *data)
         free(ss);
         full_reset();
     } 
+
+    
     //------------------------------------
     if (strcmp(command,"intro")==0) {
         char *ss;
@@ -233,6 +235,32 @@ void data_parse(char *data)
     }
 
     //------------------------------------
+    if (strcmp(command,"dalireset")==0) {
+        uint8_t adr=0, typ=0;
+        JSON_getint(rcv_json,"adres", &adr);
+        JSON_getint(rcv_json,"type", &typ);
+        char *ss;
+        asprintf(&ss,"gear_reset");
+        display_write(2,ss);
+        free(ss);
+        gear_reset(adr, typ);
+    } 
+
+    //------------------------------------
+    if (strcmp(command,"s_refresh")==0) {
+        uint8_t adr=0, typ=0;
+        JSON_getint(rcv_json,"adres", &adr);
+        JSON_getint(rcv_json,"type", &typ);
+        single_refresh(adr, typ);
+    } 
+    if (strcmp(command,"s_reset")==0) {
+        uint8_t adr=0, typ=0;
+        JSON_getint(rcv_json,"adres", &adr);
+        JSON_getint(rcv_json,"type", &typ);
+        perde_reset(adr, typ);
+    } 
+
+    
     if (strcmp(command,"set_zaman")==0) {
       uint8_t adr=0, grp=0;
         display_write(2,"Set Time");
