@@ -64,8 +64,10 @@ esp_err_t WW5500::start(home_network_config_t cnf, config_t *gcnf)
     char if_desc_str[10];
     char num_str[3];
         itoa(0, num_str, 10);
-        strcat(strcpy(if_key_str, "ETH_SPI_"), num_str);
+
+        //strcat(strcpy(if_key_str, " ETH_DEF "), num_str);
         strcat(strcpy(if_desc_str, "eth"), num_str);
+        strcpy(if_key_str, "ETH_DEF");
         esp_netif_config.if_key = if_key_str;
         esp_netif_config.if_desc = if_desc_str;
         esp_netif_config.route_prio = 30 ;

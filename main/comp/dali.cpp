@@ -309,7 +309,7 @@ void IRAM_ATTR  Dali::int_handler(void *args)
     Dali *self = (Dali *)args;
     bool level = gpio_get_level(self->_rx);
     static bool gec=false; 
-    BaseType_t high_task_awoken = pdFALSE;
+   // BaseType_t high_task_awoken = pdFALSE;
     
     if (!self->start_bit_begin && !level) { 
         //Start biti için hat sıfıra düştü

@@ -20,6 +20,8 @@ dependencies:
     path: D:/esp_prj/global/ESP32Time 
   iptool:
     path: D:/esp_prj/global/iptool
+  smq_tftp:
+    path: D:/esp_prj/global/smq_tftp  
   
        
   bblanchon/arduinojson: "^6.21.3"  

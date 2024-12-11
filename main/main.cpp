@@ -32,6 +32,7 @@
 #include "comp/network.h"
 #include "comp/cron/cron.h"
 
+
 #define FATAL_MSG(a, str)                          \
     if (!(a))                                                     \
     {                                                             \
@@ -134,12 +135,17 @@ void display_write(int satir, const char *txt)
 #endif    
 }
 
+#include "tools/smqmdns.cpp"
 #include "tools/events.cpp"
 #include "tools/config.cpp"
 #include "tools/dali_tool.cpp"
 #include "tools/tcp_events.cpp"
 
+
 #include "comp/http.c"
+#include "smq_tftp.h"
+
+
 
 void webwrite(home_network_config_t net, config_t glob)
 {
@@ -221,11 +227,13 @@ void query_dns(const char *name)
 }
 
 
+
+
 extern "C" void app_main()
 {
     esp_log_level_set("wifi", ESP_LOG_NONE);
     esp_log_level_set("wifi_init", ESP_LOG_NONE);
-    esp_log_level_set("phy_init", ESP_LOG_NONE);
+   // esp_log_level_set("phy_init", ESP_LOG_NONE);
     esp_log_level_set("gpio", ESP_LOG_NONE);
     esp_log_level_set("SOCKET_SERVER", ESP_LOG_NONE);
     
@@ -323,8 +331,6 @@ extern "C" void app_main()
     cJSON_Delete(root);
     free(ss0);
 
-    
-
 ESP_LOGI(TAG, "Init CRON..");
 init_cron();
 xTaskCreatePinnedToCore(heard_task, "task_00", 2048, NULL, 10, NULL,1);
@@ -335,8 +341,12 @@ Get_current_time(tt);
 display_write(3,tt);
 free(tt);
 
+initialise_mdns();
+//smq_tftp_start();
+
 
 ESP_LOGI(TAG, "Init Stop..");
+
 
 //   dali_out_test();
 

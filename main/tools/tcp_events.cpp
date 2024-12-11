@@ -94,18 +94,28 @@ void data_parse(char *data)
     if (strcmp(command,"list_number")==0) {
         gear_t ff = {};
         uint8_t count=0;
+        cJSON *root = cJSON_CreateObject();
+        cJSON *Lm;
+        cJSON_AddStringToObject(root, "com", "list_number");
+        cJSON *gear = cJSON_CreateArray();
+        cJSON_AddItemToObject(root, "device", gear);
+
         for (int i=0;i<64;i++)
         {
             disk.read_file(GEAR_FILE,&ff,sizeof(gear_t),i);
             if (ff.short_addr<64) {
                 ESP_LOGI(TAG,"%02d: Short Addr : %02d  Type : %02X Ext : %02X Trns : %s",++count,ff.short_addr, (ff.type>0x0A) ? ff.type-10 : ff.type, ff.ext_type, (ff.type>=0x0A)?"Wifi":"Cable");
+                cJSON_AddItemToArray(gear, Lm = cJSON_CreateObject());
+                cJSON_AddItemToObject(Lm, "addr", cJSON_CreateNumber(ff.short_addr));
+                char *tp;
+                asprintf(&tp,"%02X/%02X",ff.type,ff.ext_type);
+                cJSON_AddItemToObject(Lm, "type", cJSON_CreateString(tp)); 
+                cJSON_AddItemToObject(Lm, "wifi", cJSON_CreateNumber((ff.type>=0x0A)?1:0)); 
+                free(tp);
             }
-        } 
-        
-        cJSON *root = cJSON_CreateObject();
-        cJSON_AddStringToObject(root, "com", "search");
-        cJSON_AddNumberToObject(root, "status", 0);
+        }        
         char *dat = cJSON_PrintUnformatted(root);
+        printf("%s\n",dat);
         tcpserver.Send(dat);
         cJSON_free(dat);
         cJSON_Delete(root);
@@ -132,8 +142,7 @@ void data_parse(char *data)
         free(ss);
         full_reset();
     } 
-
-    
+   
     //------------------------------------
     if (strcmp(command,"intro")==0) {
         char *ss;
@@ -244,6 +253,14 @@ void data_parse(char *data)
         display_write(2,ss);
         free(ss);
         gear_reset(adr, typ);
+    } 
+
+    if (strcmp(command,"find_mdns")==0) {
+        char *ss;
+        asprintf(&ss,"find mDNS");
+        display_write(2,ss);
+        free(ss);
+        query_mdns_service("_http", "_tcp");
     } 
 
     //------------------------------------

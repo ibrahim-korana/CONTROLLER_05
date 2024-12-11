@@ -11,7 +11,7 @@
     "idf.openOcdConfigs": [
         "board/esp32-wrover-kit-3.3v.cfg"
     ],
-    "idf.portWin": "COM5",
+    "idf.portWin": "COM4",
     "idf.pythonBinPathWin": "d:\\.espressif\\python_env\\idf5.2_py3.11_env\\Scripts\\python.exe",
     "idf.toolsPathWin": "d:\\.espressif",
     "C_Cpp.errorSquiggles": "disabled",
@@ -27,6 +27,7 @@
         "chrono": "cpp",
         "random": "cpp",
         "limits": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "argtable3.h": "c"
     }
 }

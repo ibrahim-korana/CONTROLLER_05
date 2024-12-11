@@ -18,11 +18,11 @@ dependencies:
       type: local
     version: 1.0.0
   espressif/mdns:
-    component_hash: af6306fe65d637a3683d1cf671508fcedd6b05f9ca029a8815abeab64001fb8d
+    component_hash: f5267872ed0c810d1b281c41a567cace7b3a3695c0df9dff89f631e9ba426ed0
     source:
       service_url: https://api.components.espressif.com/
       type: service
-    version: 1.4.0
+    version: 1.4.2
   home_8563:
     component_hash: null
     source:
@@ -58,12 +58,18 @@ dependencies:
       path: D:\esp_prj\global\iptool
       type: local
     version: 1.0.0
+  smq_tftp:
+    component_hash: null
+    source:
+      path: D:\esp_prj\global\smq_tftp
+      type: local
+    version: 1.0.0
   ssd1306:
     component_hash: null
     source:
       path: D:\esp_prj\global\ssd1306
       type: local
     version: 1.0.0
-manifest_hash: 6a0b15c7c4aa1f5b299e255f81327ecdbd8850273f4a9f4527858e64515cb2da
+manifest_hash: 5df4cd062e21270252736fc32acb40cbc964b5c78c2df7e95a0a3b7c9ab913f7
 target: esp32
 version: 1.0.0

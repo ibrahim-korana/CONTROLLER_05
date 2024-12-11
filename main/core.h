@@ -25,6 +25,7 @@ typedef struct {
     uint8_t pow1;
     uint8_t pow2;
     uint8_t pow3;
+    uint8_t mdnshost[64];
 } config_t;
 
 enum {

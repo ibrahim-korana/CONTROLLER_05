@@ -66,6 +66,10 @@ void UdpServer::server_task(void *pvParameters)
             } else {
                 inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
                 rx_buffer[len] = 0;
+                if (strcmp((char*)rx_buffer,"ping")==0)
+                {
+                    sendto(ths->MainSock, "pong", 4, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
+                } else {
                 uint8_t bcklen=0;
                 ths->callback(rx_buffer, len, back, &bcklen);
                 if (bcklen>0)
@@ -76,6 +80,7 @@ void UdpServer::server_task(void *pvParameters)
                             break;
                         }
                   }
+                }
             }
         } //while
         free(rx_buffer);

@@ -16,6 +16,8 @@ void default_config(void)
      GlobalConfig.daliserver_start=1;
      GlobalConfig.comminication=0;
      GlobalConfig.time_sync=1;
+     strcpy((char *)GlobalConfig.mdnshost,"SMQ_01");
+     
 
      GlobalConfig.tus1=13;
      GlobalConfig.tus2=13;
@@ -58,6 +60,9 @@ void network_default_config(void)
     NetworkConfig.wifi_type = HOME_WIFI_STA;
     strcpy((char *)NetworkConfig.wifi_ssid,(char *)"Baguette Modem");
     strcpy((char *)NetworkConfig.wifi_pass,(char *)"Baguette2024");
+
+    strcpy((char *)NetworkConfig.wifi_ssid,(char *)"IMS_YAZILIM");
+    strcpy((char *)NetworkConfig.wifi_pass,(char *)"mer6514a4c");
     
     disk.file_control(NETWORK_FILE);
     disk.write_file(NETWORK_FILE,&NetworkConfig,sizeof(NetworkConfig),0);

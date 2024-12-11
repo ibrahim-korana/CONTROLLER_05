@@ -77,7 +77,8 @@ void ip_handler(void* handler_args, esp_event_base_t base, int32_t id, void* eve
 
 void eth_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
-    //ESP_LOGW(TAG, "ETH %ld %ld", id , base, id);
+  //  printf("ETH %ld\n" ,id);
+
     if (id==ETHERNET_EVENT_CONNECTED)
         	{
         		esp_eth_handle_t eth_handle = *(esp_eth_handle_t *)event_data;
